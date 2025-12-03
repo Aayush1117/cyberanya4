@@ -73,7 +73,8 @@
   <script>
     async function handleLogin(event) {
       event.preventDefault();
-  Swal.fire({
+
+      Swal.fire({
             icon:"info",
             title:"Please wait loging...",
             text:`Loging to your account`,
@@ -86,11 +87,12 @@
 
         });
 
+
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
       try {
-        const res = await fetch("https://tools.atrox.in/login", {
+        const res = await fetch("/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -101,13 +103,41 @@
         const data = await res.json();
 
         document.getElementById("message").innerText = data.message;
+  
 
-        if (data.ok) {
-          localStorage.setItem("auth", "true");
-          window.location.href = "dashboard.html"; 
+        if (data.code == "lin") {
+localStorage.setItem("user", JSON.stringify(data.user));
+
+    window.location.href = "/dashboard"; 
           
         }
 
+if(data.code=="anf"){
+        Swal.fire({
+            icon:"error",
+            title:"Account not found",
+            text:`Create your account for CyberAnya 4.0`,
+            showConfirmButton:true
+
+             }).then(() => {
+  window.location.href = "/signup"; // redirect here
+});
+
+}
+
+
+if(data.code=="icp"){
+        Swal.fire({
+            icon:"error",
+            title:"Wrong password!",
+            text:`Wrong password, please try agin.`,
+            showConfirmButton:true
+
+             
+});
+
+}
+        
         if (!data.ok) {
           localStorage.setItem("auth", "false");
 
@@ -120,11 +150,11 @@
     }
 
     function goSignup() {
-      window.location.href = "signup.html";
+      window.location.href = "/signup";
     }
 
     function goForgot() {
-      window.location.href = "/login/forgetpassword.html";
+      window.location.href = "/login/forgetpassword";
     }
   </script>
 </head>
@@ -148,5 +178,3 @@
   </div>
 </body>
 </html>
-
-

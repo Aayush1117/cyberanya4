@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Registration</title>
+
+  <style>
+    body {
+      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .box {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 700px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+
+    input[readonly] {
+      background: #eee;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #4338ca;
+    }
+
+    h2 {
+      text-align: center;
+      color: #4f46e5;
+      margin-bottom: 25px;
+      font-size: 28px;
+    }
+  </style>
+
+  <script>
+    // Prefill email
+    const userEmail = localStorage.getItem("email") || "";
+
+    window.onload = () => {
+      document.getElementById("email").value = userEmail;
+    };
+
+    async function submitForm(event) {
+      event.preventDefault();
+
+      const token = localStorage.getItem("token");
+      const formElem = document.getElementById("eventForm");
+      const formData = new FormData(formElem);
+
+      try {
+        const res = await fetch("http://localhost:5000/api/event/register", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+
+        const data = await res.json();
+        alert(data.message || "Registration submitted!");
+
+        formElem.reset();
+        document.getElementById("email").value = userEmail;
+
+      } catch (error) {
+        console.error(error);
+        alert("Error submitting form");
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="box">
+      <h2>Event Registration</h2>
+
+      <form id="eventForm" onsubmit="submitForm(event)">
+
+        <!-- Email -->
+        <input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="Email"
+          readonly
+        />
+
+        <!-- Full Name -->
+        <input
+          name="fullName"
+          type="text"
+          placeholder="Full Name"
+          required
+        />
+
+        <!-- Mobile Number -->
+        <input
+          name="mobile"
+          type="text"
+          placeholder="Mobile Number"
+          required
+        />
+
+        <!-- Semester -->
+        <select name="semester" required>
+          <option value="">Select Semester</option>
+          <option value="1st">1st Semester</option>
+          <option value="2nd">2nd Semester</option>
+          <option value="3rd">3rd Semester</option>
+          <option value="4th">4th Semester</option>
+          <option value="5th">5th Semester</option>
+        </select>
+
+        <!-- Event -->
+        <select name="event" required>
+          <option value="">Select Event</option>
+          <option value="Coding Competition">Coding Competition</option>
+          <option value="Tech Quiz">Tech Quiz</option>
+          <option value="Robotics">Robotics</option>
+          <option value="Web Development">Web Development</option>
+        </select>
+
+        <!-- Team Members -->
+        <input
+          name="teamMembers"
+          type="text"
+          placeholder="Team Members (if any)"
+        />
+
+        <!-- UTR Number -->
+        <input
+          name="utrNumber"
+          type="text"
+          placeholder="UTR Number"
+          required
+        />
+
+        <!-- Payment Screenshot -->
+        <input
+          name="paymentScreenshot"
+          type="file"
+          accept="image/*"
+          required
+        />
+
+        <!-- Submit Button -->
+        <button type="submit">Submit Registration</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

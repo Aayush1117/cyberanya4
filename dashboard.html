@@ -14,9 +14,9 @@
 <body class="bg-gray-100">
 
   <div class="flex min-h-screen">
-    
-    <!-- Sidebar -->
-    <aside class="w-64 bg-white shadow-xl p-6 flex flex-col">
+
+    <!-- Sidebar (hidden on mobile) -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-xl p-6 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50">
       <h2 class="text-2xl font-bold text-indigo-600 mb-8">Dashboard</h2>
 
       <nav class="flex flex-col gap-4">
@@ -28,7 +28,7 @@
         </a>
 
         <a 
-          href="/activity"
+          href="activity.html"
           class="flex items-center gap-3 text-gray-700 hover:text-indigo-600"
         >
           <i data-lucide="clipboard-pen"></i> Activity
@@ -43,13 +43,25 @@
       </button>
     </aside>
 
+    <!-- Mobile Header -->
+    <header class="md:hidden fixed top-0 left-0 right-0 bg-white shadow-md flex items-center justify-between p-4 z-40">
+      <h2 class="text-xl font-bold text-indigo-600">Dashboard</h2>
+      <button id="menu-btn" class="p-2 rounded-md bg-gray-100 hover:bg-gray-200">
+        <i data-lucide="menu"></i>
+      </button>
+    </header>
+
+    <!-- Overlay for mobile menu -->
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-40"></div>
+
     <!-- Main Content -->
-    <main class="flex-1 p-10">
+    <main class="flex-1 p-10 md:ml-64 mt-0 md:mt-0">
       <div id="content">
         <h1 class="text-3xl font-bold text-gray-700">Welcome to Dashboard</h1>
         <p class="mt-2 text-gray-600">Select an option from the sidebar.</p>
       </div>
     </main>
+
   </div>
 
   <script>
@@ -61,7 +73,34 @@
       localStorage.removeItem("token");
       window.location.href = "/login";
     }
+
+    // Mobile sidebar toggle
+    const menuBtn = document.getElementById('menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+
+    menuBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('-translate-x-full');
+      overlay.classList.toggle('hidden');
+    });
+
+    overlay.addEventListener('click', () => {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+    });
+
+    // Automatically close sidebar on window resize
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 768) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.add('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+      }
+    });
   </script>
 
 </body>
 </html>
+
+

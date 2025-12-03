@@ -1,143 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Event Registration</title>
 
-  <style>
-    body {
-      background: #f3f4f6;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    .container {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .box {
-      background: white;
-      padding: 30px;
-      border-radius: 20px;
-      width: 100%;
-      max-width: 700px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      font-size: 15px;
-    }
-
-    input[readonly] {
-      background: #eee;
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      background: #4f46e5;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 17px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #4338ca;
-    }
-
-    h2 {
-      text-align: center;
-      color: #4f46e5;
-      margin-bottom: 25px;
-      font-size: 28px;
-    }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
-    // Prefill email
-    const userEmail = localStorage.getItem("email") || "";
-
-    window.onload = () => {
-      document.getElementById("email").value = userEmail;
-    };
-
     async function submitForm(event) {
       event.preventDefault();
 
-      const token = localStorage.getItem("token");
+      Swal.fire({
+        icon: "info",
+        title: "Submitting...",
+        text: "Please wait while we submit your form",
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
       const formElem = document.getElementById("eventForm");
       const formData = new FormData(formElem);
 
+      for (let p of formData.entries()) {
+  console.log(p[0], p[1]);
+}
+
+
       try {
-        const res = await fetch("http://localhost:5000/api/event/register", {
+        const res = await fetch("/eventform", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
           body: formData,
         });
 
+
         const data = await res.json();
-        alert(data.message || "Registration submitted!");
 
+        if (data.code == "ald") {
+          localStorage.setItem("code", "ald");
+
+          Swal.fire({
+            icon: "info",
+            title: "Already Registered",
+            text: data.message,
+          }).then(() => (window.location.href = "/dashboard"));
+          return;
+        }
+
+        localStorage.setItem("code", "ald");
+if(data.code=="done"){
+        Swal.fire({
+          icon: "success",
+          title: "Registration Successful",
+          text: `Registration submitted successfully!`,
+        }).then(() => (window.location.href = "/dashboard"));
+      }
         formElem.reset();
-        document.getElementById("email").value = userEmail;
-
       } catch (error) {
         console.error(error);
-        alert("Error submitting form");
+        Swal.fire("Error", "Error submitting form", "error");
       }
     }
   </script>
 </head>
 
-<body>
-  <div class="container">
-    <div class="box">
-      <h2>Event Registration</h2>
+<body class="bg-gray-100">
 
-      <form id="eventForm" onsubmit="submitForm(event)">
+  <div class="min-h-screen flex justify-center items-center p-5">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-lg p-8">
 
-        <!-- Email -->
+      <h2 class="text-center text-3xl font-bold text-indigo-600 mb-6">Event Registration</h2>
+
+<form id="eventForm" onsubmit="submitForm(event)" 
+      enctype="multipart/form-data" 
+      class="space-y-4">
+
         <input
           id="email"
           name="email"
           type="email"
           placeholder="Email"
           readonly
+          value="<%= email %>"
+          class="w-full p-3 rounded-lg border border-gray-300 bg-gray-100"
         />
 
-        <!-- Full Name -->
         <input
-          name="fullName"
+          name="fullname"
           type="text"
           placeholder="Full Name"
-          required
+          readonly
+          value="<%= fullname %>"
+          class="w-full p-3 rounded-lg border border-gray-300 bg-gray-100"
         />
 
-        <!-- Mobile Number -->
+        <select
+          name="gender"
+          id="gender"
+          class="w-full p-3 rounded-lg border border-gray-300"
+        >
+          <option value="">Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+
         <input
-          name="mobile"
+          name="roll"
           type="text"
-          placeholder="Mobile Number"
+          placeholder="Roll No."
           required
+          class="w-full p-3 rounded-lg border border-gray-300"
         />
 
-        <!-- Semester -->
-        <select name="semester" required>
+        <select
+          name="semester"
+          required
+          class="w-full p-3 rounded-lg border border-gray-300"
+        >
           <option value="">Select Semester</option>
           <option value="1st">1st Semester</option>
           <option value="2nd">2nd Semester</option>
@@ -146,42 +127,101 @@
           <option value="5th">5th Semester</option>
         </select>
 
-        <!-- Event -->
-        <select name="event" required>
-          <option value="">Select Event</option>
-          <option value="Coding Competition">Coding Competition</option>
-          <option value="Tech Quiz">Tech Quiz</option>
-          <option value="Robotics">Robotics</option>
-          <option value="Web Development">Web Development</option>
-        </select>
+        <!-- ACTIVITIES IN ONE LINE -->
+<div>
+  <label class="font-semibold text-gray-700">Activities</label>
 
-        <!-- Team Members -->
+  <div class="flex flex-wrap items-center gap-6 mt-2">
+
+    <label class="flex items-center gap-2">
+      <input id="gamecheck" type="checkbox" name="game" value="true" class="w-4 h-4" />
+      <span>Game</span>
+    </label>
+
+    <label class="flex items-center gap-2">
+      <input id="wgame" disabled type="radio" name="wgame" value="BGMI" class="w-4 h-4" />
+      <span>BGMI</span>
+    </label>
+
+    <label  class="flex items-center gap-2">
+      <input disabled id="wgame1" type="radio" name="wgame" value="FREEFIREMAX" class="w-4 h-4" />
+      <span>Free Fire Max</span>
+    </label>
+
+    <label class="flex items-center gap-2">
+      <input type="checkbox" name="ppt" value="true" class="w-4 h-4" />
+      <span>Idea PPT</span>
+    </label>
+
+    <label class="flex items-center gap-2">
+      <input type="checkbox" name="poster" value="true" class="w-4 h-4" />
+      <span>Idea Poster</span>
+    </label>
+
+    <label class="flex items-center gap-2">
+      <input type="checkbox" name="soft" value="true" class="w-4 h-4" />
+      <span>Software Project</span>
+    </label>
+
+  </div>
+</div>
+
         <input
           name="teamMembers"
           type="text"
-          placeholder="Team Members (if any)"
+          placeholder="Team Members (Optional)"
+          class="w-full p-3 rounded-lg border border-gray-300"
         />
 
-        <!-- UTR Number -->
         <input
           name="utrNumber"
           type="text"
           placeholder="UTR Number"
           required
+          class="w-full p-3 rounded-lg border border-gray-300"
         />
 
-        <!-- Payment Screenshot -->
         <input
           name="paymentScreenshot"
           type="file"
           accept="image/*"
           required
+          class="w-full p-3 rounded-lg border border-gray-300 bg-gray-50"
         />
 
-        <!-- Submit Button -->
-        <button type="submit">Submit Registration</button>
+        <button
+          type="submit"
+          class="w-full bg-indigo-600 text-white py-3 rounded-lg text-lg font-semibold hover:bg-indigo-700"
+        >
+          Submit Registration
+        </button>
+
       </form>
+
     </div>
   </div>
+
+  <script>
+  const gameCheckbox = document.getElementById("gamecheck");
+  const bgmi = document.getElementById("wgame");
+  const ff = document.getElementById("wgame1");
+
+  gameCheckbox.addEventListener("change", () => {
+    if (gameCheckbox.checked) {
+      // Enable radios
+      bgmi.disabled = false;
+      ff.disabled = false;
+    } else {
+      // Disable & uncheck radios
+      bgmi.disabled = true;
+      ff.disabled = true;
+
+      bgmi.checked = false;
+      ff.checked = false;
+    }
+  });
+</script>
+
+
 </body>
 </html>
